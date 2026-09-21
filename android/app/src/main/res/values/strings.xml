@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AutoSend AI</string>
+    <string name="accessibility_description">AutoSend AI Accessibility Service is required to automatically type and send scheduled WhatsApp messages.</string>
+</resources>

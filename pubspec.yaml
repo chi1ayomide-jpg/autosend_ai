@@ -1,0 +1,25 @@
+name: autosend_ai
+description: "Native AI Auto-Replier & SKEDit Scheduler with High Glassmorphism Green Interface"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  http: ^1.2.0
+  shared_preferences: ^2.2.2
+  intl: ^0.19.0
+  speech_to_text: ^6.6.0
+  csv: ^6.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
