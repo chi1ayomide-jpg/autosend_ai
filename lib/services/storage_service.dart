@@ -13,18 +13,7 @@ class StorageService {
     final prefs = await SharedPreferences.getInstance();
     final String? tasksJson = prefs.getString(_tasksKey);
     if (tasksJson == null || tasksJson.isEmpty) {
-      // Return sample demo task if empty
-      final sampleTask = ScheduledTask(
-        id: '1',
-        recipientName: 'SYNANTÓ YESHUA (ENCOUNTER JESUS)',
-        recipientPhone: '+2348000000000',
-        message: "Good morning Everyone! Let's remind ourselves that prayer holds weekly blessings.",
-        scheduledTime: DateTime.now().add(const Duration(hours: 9, minutes: 20, seconds: 26)),
-        status: TaskStatus.pending,
-        recurrence: RecurrenceType.daily,
-      );
-      await saveTasks([sampleTask]);
-      return [sampleTask];
+      return [];
     }
     final List<dynamic> decoded = jsonDecode(tasksJson);
     return decoded.map((item) => ScheduledTask.fromJson(item)).toList();
