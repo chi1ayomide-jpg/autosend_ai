@@ -29,6 +29,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.24.5'
           channel: 'stable'
           cache: true
 
@@ -47,24 +48,28 @@ jobs:
           name: autosend-ai-release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
 
+      - name: Generate Release Tag
+        id: tag
+        run: echo "TAG=v1.0.$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
+
       - name: Create GitHub Release
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0
-          name: "AutoSend AI v1.0.0 Release"
+          tag_name: ${{ steps.tag.outputs.TAG }}
+          name: "AutoSend AI ${{ steps.tag.outputs.TAG }}"
           body: |
-            ## 🚀 AutoSend AI - Native Android Auto-Replier & SKEDit Scheduler
-            
+            ## 🚀 AutoSend AI — WhatsApp Auto-Reply & Scheduler
+
             ### ✨ Features:
-            - **Emerald Glassmorphic UI**: High-fidelity dark glass interface built with Flutter / Dart.
-            - **Notification Listener Service**: Automated inline AI WhatsApp replying (`RemoteInput`).
-            - **Accessibility Automation**: Automated chat opening, text typing, and send button clicks.
-            - **Exact Alarms Engine**: High precision scheduling with Doze mode battery bypass.
-            - **AI Engine**: Gemini & OpenAI smart auto-reply integration.
-            
-            ### 📲 Download:
-            Download and install `app-release.apk` below on your Android device!
+            - **Emerald Glassmorphic UI** — Flutter dark glass interface with neon accents.
+            - **Notification Listener Service** — AI-powered inline WhatsApp auto-reply (`RemoteInput`).
+            - **Accessibility Automation** — Automated chat open, type, and send.
+            - **Exact Alarms Engine** — High-precision scheduling with Doze bypass.
+            - **AI Engine** — Gemini & OpenAI smart auto-reply integration.
+
+            ### 📲 Install:
+            Download `app-release.apk` below and install on your Android device.
           files: build/app/outputs/flutter-apk/app-release.apk
           draft: false
           prerelease: false
