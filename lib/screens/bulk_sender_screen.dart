@@ -384,7 +384,7 @@ class _BulkSenderScreenState extends State<BulkSenderScreen> with SingleTickerPr
                     Icon(Icons.verified_user_rounded, color: GlassTheme.primaryNeon, size: 20),
                     SizedBox(width: 8),
                     Text(
-                      "Safety, Approval & AI Tagging",
+                      "Safety & Approval Controls",
                       style: TextStyle(color: GlassTheme.primaryNeon, fontWeight: FontWeight.bold, fontSize: 14),
                     ),
                   ],

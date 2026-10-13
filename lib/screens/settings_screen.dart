@@ -12,8 +12,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  late AppSettings _settings;
-  bool _isLoading = true;
+  AppSettings _settings = AppSettings();
   final _geminiKeyController = TextEditingController();
   final _openAiKeyController = TextEditingController();
 
@@ -25,12 +24,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadSettings() async {
     final s = await StorageService.loadSettings();
-    setState(() {
-      _settings = s;
-      _geminiKeyController.text = s.geminiApiKey;
-      _openAiKeyController.text = s.openAiApiKey;
-      _isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _settings = s;
+        _geminiKeyController.text = s.geminiApiKey;
+        _openAiKeyController.text = s.openAiApiKey;
+      });
+    }
   }
 
   Future<void> _updateSettings(AppSettings updated) async {
@@ -40,11 +40,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator(color: GlassTheme.primaryNeon)),
-      );
-    }
 
     return Scaffold(
       appBar: AppBar(
