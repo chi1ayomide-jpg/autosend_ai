@@ -19,13 +19,13 @@ class WhatsAppNotificationListener : NotificationListenerService() {
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         if (sbn == null) return
         val pkg = sbn.packageName
-        if (pkg != "com.whatsapp" && pkg != "com.whatsapp.w4b") return
+        if (pkg != "com.whatsapp" && pkg != "com.whatsapp.w4b" && pkg != "com.gbwhatsapp") return
 
         val extras = sbn.notification.extras
         val title = extras.getString(Notification.EXTRA_TITLE) ?: return
         val text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: return
 
-        Log.d("WabotNotification", "Received notification from $title: $text")
+        Log.d("OmniFlowNotification", "Received notification from $title: $text")
 
         // Async AI & Auto-Reply execution
         thread {
@@ -38,13 +38,16 @@ class WhatsAppNotificationListener : NotificationListenerService() {
         val autoReplyEnabled = prefs.getBoolean("flutter.auto_reply_enabled", true)
         if (!autoReplyEnabled) return
 
+        val includeAiTag = prefs.getBoolean("flutter.include_ai_tag", true)
+        val aiTag = if (includeAiTag) "\n\n_⚡ AI Assisted • OmniFlow AI_" else ""
+
         val apiKey = prefs.getString("flutter.gemini_api_key", "") ?: ""
-        var replyMessage = "Hello $sender! AutoSend AI received: $incomingText"
+        var replyMessage = "Hello $sender! OmniFlow AI received: $incomingText$aiTag"
 
         if (apiKey.isNotEmpty()) {
             val aiResponse = callGeminiAI(apiKey, incomingText)
             if (aiResponse.isNotEmpty()) {
-                replyMessage = aiResponse
+                replyMessage = "$aiResponse$aiTag"
             }
         }
 
@@ -61,9 +64,9 @@ class WhatsAppNotificationListener : NotificationListenerService() {
 
                     try {
                         action.actionIntent.send(applicationContext, 0, intent)
-                        Log.d("WabotNotification", "Sent inline reply: $replyMessage")
+                        Log.d("OmniFlowNotification", "Sent inline reply with AI tag: $replyMessage")
                     } catch (e: Exception) {
-                        Log.e("WabotNotification", "Failed to send inline reply", e)
+                        Log.e("OmniFlowNotification", "Failed to send inline reply", e)
                     }
                     return
                 }
@@ -84,7 +87,7 @@ class WhatsAppNotificationListener : NotificationListenerService() {
                     put(JSONObject().apply {
                         put("parts", JSONArray().apply {
                             put(JSONObject().apply {
-                                put("text", "You are an automated assistant replying to WhatsApp chats. Concise reply to: $prompt")
+                                put("text", "You are an automated assistant replying to WhatsApp chats. Concise, polite reply to: $prompt")
                             })
                         })
                     })
@@ -100,13 +103,16 @@ class WhatsAppNotificationListener : NotificationListenerService() {
                 val responseJson = JSONObject(responseText)
                 val candidates = responseJson.getJSONArray("candidates")
                 if (candidates.length() > 0) {
-                    val parts = candidates.getJSONObject(0).getJSONObject("content").getJSONArray("parts")
-                    return parts.getJSONObject(0).getString("text").trim()
+                    val content = candidates.getJSONObject(0).getJSONObject("content")
+                    val parts = content.getJSONArray("parts")
+                    if (parts.length() > 0) {
+                        return parts.getJSONObject(0).getString("text").trim()
+                    }
                 }
             }
             ""
         } catch (e: Exception) {
-            Log.e("WabotNotification", "Gemini API Call error", e)
+            Log.e("OmniFlowAI", "Gemini API error", e)
             ""
         }
     }

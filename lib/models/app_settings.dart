@@ -4,13 +4,15 @@ class AppSettings {
   final String openAiApiKey;
   final String selectedAiModel; // "gemini" or "openai"
   final bool pauseOnCalls;
-  final bool askBeforeSending;
+  final bool askBeforeSending; // Approval required before sending
   final bool reviewBeforeSending;
   final bool skipInternetCheck;
   final int defaultDelaySeconds;
   final String defaultWhatsAppApp; // "com.whatsapp", "com.whatsapp.w4b", "com.gbwhatsapp", "auto_rotate"
   final bool notifyOnSent;
   final bool ignoreAccents;
+  final bool includeAiTag; // Attach AI indicator tag/footer
+  final String aiTagFooter; // e.g. "— 🤖 Sent via OmniFlow AI"
 
   AppSettings({
     this.autoReplyEnabled = true,
@@ -19,12 +21,14 @@ class AppSettings {
     this.selectedAiModel = "gemini",
     this.pauseOnCalls = false,
     this.askBeforeSending = true,
-    this.reviewBeforeSending = false,
+    this.reviewBeforeSending = true,
     this.skipInternetCheck = false,
     this.defaultDelaySeconds = 2,
     this.defaultWhatsAppApp = "com.whatsapp",
     this.notifyOnSent = true,
     this.ignoreAccents = true,
+    this.includeAiTag = true,
+    this.aiTagFooter = "\n\n_⚡ AI Assisted • OmniFlow AI_",
   });
 
   AppSettings copyWith({
@@ -40,6 +44,8 @@ class AppSettings {
     String? defaultWhatsAppApp,
     bool? notifyOnSent,
     bool? ignoreAccents,
+    bool? includeAiTag,
+    String? aiTagFooter,
   }) {
     return AppSettings(
       autoReplyEnabled: autoReplyEnabled ?? this.autoReplyEnabled,
@@ -54,6 +60,8 @@ class AppSettings {
       defaultWhatsAppApp: defaultWhatsAppApp ?? this.defaultWhatsAppApp,
       notifyOnSent: notifyOnSent ?? this.notifyOnSent,
       ignoreAccents: ignoreAccents ?? this.ignoreAccents,
+      includeAiTag: includeAiTag ?? this.includeAiTag,
+      aiTagFooter: aiTagFooter ?? this.aiTagFooter,
     );
   }
 
@@ -71,6 +79,8 @@ class AppSettings {
       'defaultWhatsAppApp': defaultWhatsAppApp,
       'notifyOnSent': notifyOnSent,
       'ignoreAccents': ignoreAccents,
+      'includeAiTag': includeAiTag,
+      'aiTagFooter': aiTagFooter,
     };
   }
 
@@ -82,12 +92,14 @@ class AppSettings {
       selectedAiModel: json['selectedAiModel'] ?? "gemini",
       pauseOnCalls: json['pauseOnCalls'] ?? false,
       askBeforeSending: json['askBeforeSending'] ?? true,
-      reviewBeforeSending: json['reviewBeforeSending'] ?? false,
+      reviewBeforeSending: json['reviewBeforeSending'] ?? true,
       skipInternetCheck: json['skipInternetCheck'] ?? false,
       defaultDelaySeconds: json['defaultDelaySeconds'] ?? 2,
       defaultWhatsAppApp: json['defaultWhatsAppApp'] ?? "com.whatsapp",
       notifyOnSent: json['notifyOnSent'] ?? true,
       ignoreAccents: json['ignoreAccents'] ?? true,
+      includeAiTag: json['includeAiTag'] ?? true,
+      aiTagFooter: json['aiTagFooter'] ?? "\n\n_⚡ AI Assisted • OmniFlow AI_",
     );
   }
 }

@@ -33,6 +33,11 @@ class _BulkSenderScreenState extends State<BulkSenderScreen> with SingleTickerPr
   String _selectedPackage = "com.whatsapp";
   double _sendDelaySeconds = 2.0;
 
+  // Safety & Approval controls
+  bool _requireApproval = true; // DO NOT SEND WITHOUT APPROVAL
+  bool _attachAiTag = true; // Include AI tag description indicator
+  final String _aiTagFooter = "\n\n_⚡ AI Assisted • OmniFlow AI_";
+
   // Message template
   final TextEditingController _messageController = TextEditingController(
     text: "Hello {name}, wishing you a productive {date}! Let's connect at {time}.",
@@ -133,6 +138,109 @@ class _BulkSenderScreenState extends State<BulkSenderScreen> with SingleTickerPr
     );
   }
 
+  /// Interactive Approval Dialog - Ensured zero messages sent without approval!
+  Future<bool?> _requestApprovalDialog({
+    required String recipientName,
+    required String phone,
+    required String messageText,
+    required int currentIndex,
+    required int totalCount,
+  }) async {
+    final reviewController = TextEditingController(text: messageText);
+
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor: GlassTheme.backgroundSecondary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: GlassTheme.primaryNeon, width: 1.5),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: GlassTheme.primaryEmerald.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.security, color: GlassTheme.primaryNeon, size: 20),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  "Approval Required ($currentIndex/$totalCount)",
+                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("Recipient:", style: TextStyle(color: GlassTheme.textMuted, fontSize: 12)),
+                Text("$recipientName ($phone)", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                const SizedBox(height: 12),
+                const Text("Review & Edit Message Before Send:", style: TextStyle(color: GlassTheme.textMuted, fontSize: 12)),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: reviewController,
+                  maxLines: 5,
+                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.black.withOpacity(0.4),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: GlassTheme.glassBorder),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                if (_attachAiTag)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: GlassTheme.accentBlue.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Text(
+                      "🏷️ AI Tag indicator is attached at footer",
+                      style: TextStyle(color: GlassTheme.accentBlue, fontSize: 11),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, null), // Cancel entire campaign
+              child: const Text("Stop Campaign", style: TextStyle(color: Colors.redAccent)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false), // Skip this contact
+              child: const Text("Skip", style: TextStyle(color: GlassTheme.textMuted)),
+            ),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.check_circle, color: Colors.black, size: 18),
+              label: const Text("Approve & Send", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(backgroundColor: GlassTheme.primaryNeon),
+              onPressed: () {
+                // Update text with user modifications from the approval dialog
+                _messageController.text = reviewController.text;
+                Navigator.pop(dialogContext, true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _startCampaign() async {
     final active = _recipients.where((r) => r.isSelected).toList();
     if (active.isEmpty) {
@@ -150,16 +258,54 @@ class _BulkSenderScreenState extends State<BulkSenderScreen> with SingleTickerPr
     for (int i = 0; i < active.length; i++) {
       if (!_isSending) break;
       final target = active[i];
-      final personalized = VariableService.resolve(
+
+      // 1. Resolve variables
+      var personalized = VariableService.resolve(
         _messageController.text,
         name: target.name,
         phone: target.phone,
       );
 
-      // Trigger native WhatsApp automation channel
+      // 2. Attach AI tag indicator description if enabled
+      if (_attachAiTag && !personalized.contains("OmniFlow AI")) {
+        personalized = "$personalized$_aiTagFooter";
+      }
+
+      // 3. User Approval Gate: NEVER SEND WITHOUT EXPLICIT APPROVAL
+      if (_requireApproval) {
+        final approvalResult = await _requestApprovalDialog(
+          recipientName: target.name,
+          phone: target.phone,
+          messageText: personalized,
+          currentIndex: i + 1,
+          totalCount: active.length,
+        );
+
+        if (approvalResult == null) {
+          // User aborted campaign
+          setState(() => _isSending = false);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Campaign stopped by user. Nothing more was sent.")),
+            );
+          }
+          return;
+        }
+
+        if (approvalResult == false) {
+          // User skipped this recipient
+          continue;
+        }
+
+        // Use the approved message (in case user edited it during review)
+        personalized = _messageController.text;
+      }
+
+      // 4. Trigger native WhatsApp automation channel
       await NativeChannel.triggerAutomation(
         phoneNumber: target.phone,
         message: personalized,
+        package: _selectedPackage,
       );
 
       setState(() => _sentProgress = i + 1);
@@ -169,7 +315,7 @@ class _BulkSenderScreenState extends State<BulkSenderScreen> with SingleTickerPr
     setState(() => _isSending = false);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Campaign completed! Sent $_sentProgress messages.")),
+        SnackBar(content: Text("Campaign finished! Dispatched $_sentProgress messages.")),
       );
     }
   }
@@ -245,6 +391,47 @@ class _BulkSenderScreenState extends State<BulkSenderScreen> with SingleTickerPr
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Safety & Approval Controls Banner
+          GlassContainer(
+            borderRadius: 16,
+            color: GlassTheme.primaryEmerald.withOpacity(0.15),
+            borderColor: GlassTheme.primaryNeon,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.verified_user_rounded, color: GlassTheme.primaryNeon, size: 20),
+                    SizedBox(width: 8),
+                    Text(
+                      "Safety, Approval & AI Tagging",
+                      style: TextStyle(color: GlassTheme.primaryNeon, fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text("Require Approval Before Sending", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                  subtitle: const Text("Shows a review modal before each contact. Zero messages sent without your confirmation.", style: TextStyle(color: GlassTheme.textMuted, fontSize: 11)),
+                  value: _requireApproval,
+                  activeColor: GlassTheme.primaryNeon,
+                  onChanged: (val) => setState(() => _requireApproval = val),
+                ),
+                const Divider(color: GlassTheme.glassBorderLight),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text("Attach AI Tag Indicator", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                  subtitle: const Text("Appends '⚡ AI Assisted • OmniFlow AI' footer to indicate automated generation.", style: TextStyle(color: GlassTheme.textMuted, fontSize: 11)),
+                  value: _attachAiTag,
+                  activeColor: GlassTheme.primaryNeon,
+                  onChanged: (val) => setState(() => _attachAiTag = val),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+
           // Target WhatsApp Variant Selector
           GlassContainer(
             borderRadius: 16,
@@ -337,10 +524,11 @@ class _BulkSenderScreenState extends State<BulkSenderScreen> with SingleTickerPr
                       const SizedBox(height: 4),
                       Text(
                         VariableService.resolve(
-                          _messageController.text,
-                          name: _recipients.isNotEmpty ? _recipients.first.name : "Tunde Ade",
-                          phone: _recipients.isNotEmpty ? _recipients.first.phone : "+23480...",
-                        ),
+                              _messageController.text,
+                              name: _recipients.isNotEmpty ? _recipients.first.name : "Tunde Ade",
+                              phone: _recipients.isNotEmpty ? _recipients.first.phone : "+23480...",
+                            ) +
+                            (_attachAiTag ? _aiTagFooter : ""),
                         style: const TextStyle(color: Colors.white70, fontSize: 12),
                       ),
                     ],
@@ -358,8 +546,12 @@ class _BulkSenderScreenState extends State<BulkSenderScreen> with SingleTickerPr
             child: ElevatedButton.icon(
               icon: Icon(_isSending ? Icons.pause_circle : Icons.rocket_launch, color: Colors.black),
               label: Text(
-                _isSending ? "Pause Campaign ($_sentProgress / $_selectedCount)" : "Send to $_selectedCount Selected Contacts",
-                style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15),
+                _isSending
+                    ? "Pause Campaign ($_sentProgress / $_selectedCount)"
+                    : (_requireApproval
+                        ? "Review & Send to $_selectedCount Contacts (Approval Required)"
+                        : "Send to $_selectedCount Selected Contacts"),
+                style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: GlassTheme.primaryNeon,

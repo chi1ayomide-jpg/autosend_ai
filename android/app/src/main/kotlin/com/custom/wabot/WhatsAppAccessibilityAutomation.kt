@@ -42,7 +42,18 @@ class WhatsAppAccessibilityAutomation : AccessibilityService() {
             chatInput.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments)
             Log.d("OmniFlowAccessibility", "Typed message: $pendingMessage")
 
-            // 3. Locate and tap the "Send" button across Standard, Business, and GB variants
+            // 3. Check User Approval Setting
+            val prefs = getSharedPreferences("FlutterSharedPreferences", MODE_PRIVATE)
+            val requireApproval = prefs.getBoolean("flutter.ask_before_sending", true)
+
+            if (requireApproval) {
+                Log.d("OmniFlowAccessibility", "APPROVAL REQUIRED: Message placed in input. Awaiting user review and manual send.")
+                pendingMessage = null
+                isExecuting = false
+                return
+            }
+
+            // 4. Auto-Send only if user explicitly disabled approval requirement in settings
             val sendNodes = rootNode.findAccessibilityNodeInfosByViewId("com.whatsapp:id/send")
                 .ifEmpty { rootNode.findAccessibilityNodeInfosByViewId("com.whatsapp.w4b:id/send") }
                 .ifEmpty { rootNode.findAccessibilityNodeInfosByViewId("com.gbwhatsapp:id/send") }

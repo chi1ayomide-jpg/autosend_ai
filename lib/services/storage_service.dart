@@ -64,8 +64,11 @@ class StorageService {
     final String encoded = jsonEncode(settings.toJson());
     await prefs.setString(_settingsKey, encoded);
     
-    // Sync to Android SharedPreferences for Kotlin Notification Listener
+    // Sync to Android SharedPreferences for Kotlin Notification Listener & Accessibility
     await prefs.setBool('auto_reply_enabled', settings.autoReplyEnabled);
     await prefs.setString('gemini_api_key', settings.geminiApiKey);
+    await prefs.setBool('ask_before_sending', settings.askBeforeSending);
+    await prefs.setBool('include_ai_tag', settings.includeAiTag);
+    await prefs.setString('ai_tag_footer', settings.aiTagFooter);
   }
 }
