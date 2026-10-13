@@ -2,6 +2,8 @@ package com.custom.wabot
 
 import android.accessibilityservice.AccessibilityService
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
@@ -18,9 +20,18 @@ class WhatsAppAccessibilityAutomation : AccessibilityService() {
 
         val rootNode = rootInActiveWindow ?: return
 
-        // Search for Chat input field by view ID or editable class name
+        // 1. Check for "OK" or "Continue" popups if WhatsApp shows contact confirmation
+        try {
+            val okNodes = rootNode.findAccessibilityNodeInfosByText("OK")
+            if (okNodes.isNotEmpty() && okNodes[0].isVisibleToUser) {
+                okNodes[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            }
+        } catch (_: Exception) {}
+
+        // 2. Search for Chat input field by view ID or editable class name
         val inputNodes = rootNode.findAccessibilityNodeInfosByViewId("com.whatsapp:id/entry")
             .ifEmpty { rootNode.findAccessibilityNodeInfosByViewId("com.whatsapp.w4b:id/entry") }
+            .ifEmpty { rootNode.findAccessibilityNodeInfosByViewId("com.gbwhatsapp:id/entry") }
             .ifEmpty { findEditableNodes(rootNode) }
 
         if (inputNodes.isNotEmpty()) {
@@ -29,18 +40,28 @@ class WhatsAppAccessibilityAutomation : AccessibilityService() {
                 putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, pendingMessage)
             }
             chatInput.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments)
-            Log.d("WabotAccessibility", "Typed pending message: $pendingMessage")
+            Log.d("OmniFlowAccessibility", "Typed message: $pendingMessage")
 
-            // Locate and tap the "Send" button
+            // 3. Locate and tap the "Send" button across Standard, Business, and GB variants
             val sendNodes = rootNode.findAccessibilityNodeInfosByViewId("com.whatsapp:id/send")
                 .ifEmpty { rootNode.findAccessibilityNodeInfosByViewId("com.whatsapp.w4b:id/send") }
+                .ifEmpty { rootNode.findAccessibilityNodeInfosByViewId("com.gbwhatsapp:id/send") }
                 .ifEmpty { rootNode.findAccessibilityNodeInfosByText("Send") }
 
             if (sendNodes.isNotEmpty()) {
                 sendNodes[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                Log.d("WabotAccessibility", "Clicked Send button!")
+                Log.d("OmniFlowAccessibility", "Clicked Send button successfully!")
                 pendingMessage = null
                 isExecuting = false
+
+                // Auto return back to OmniFlow AI after sending
+                Handler(Looper.getMainLooper()).postDelayed({
+                    try {
+                        performGlobalAction(GLOBAL_ACTION_BACK)
+                    } catch (e: Exception) {
+                        Log.e("OmniFlowAccessibility", "Failed to navigate back: ${e.message}")
+                    }
+                }, 800)
             }
         }
     }
@@ -58,6 +79,6 @@ class WhatsAppAccessibilityAutomation : AccessibilityService() {
     }
 
     override fun onInterrupt() {
-        Log.w("WabotAccessibility", "Accessibility Service Interrupted")
+        Log.w("OmniFlowAccessibility", "Accessibility Service Interrupted")
     }
 }

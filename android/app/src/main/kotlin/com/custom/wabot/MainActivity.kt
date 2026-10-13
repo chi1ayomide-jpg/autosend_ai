@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
+import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -64,6 +65,31 @@ class MainActivity : FlutterActivity() {
                     
                     scheduleAlarm(taskId, timeInMillis, phone, message)
                     result.success(true)
+                }
+                "triggerAutomation" -> {
+                    val phone = call.argument<String>("phone") ?: ""
+                    val message = call.argument<String>("message") ?: ""
+                    val targetPackage = call.argument<String>("package") ?: "com.whatsapp"
+
+                    WhatsAppAccessibilityAutomation.pendingMessage = message
+                    WhatsAppAccessibilityAutomation.isExecuting = true
+
+                    val cleanPhone = phone.replace(Regex("[^0-9]"), "")
+                    val whatsappIntent = Intent(Intent.ACTION_VIEW).apply {
+                        data = Uri.parse("https://api.whatsapp.com/send?phone=$cleanPhone&text=")
+                        if (targetPackage != "auto_rotate") {
+                            setPackage(targetPackage)
+                        }
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    }
+
+                    try {
+                        startActivity(whatsappIntent)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        Log.e("OmniFlowMain", "Error launching WhatsApp: ${e.message}")
+                        result.success(false)
+                    }
                 }
                 else -> result.notImplemented()
             }

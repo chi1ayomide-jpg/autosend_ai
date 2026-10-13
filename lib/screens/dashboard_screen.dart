@@ -57,7 +57,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: const Icon(Icons.bolt, color: GlassTheme.primaryNeon, size: 20),
             ),
             const SizedBox(width: 10),
-            const Text("AutoSend AI"),
+            const Text("OmniFlow AI"),
           ],
         ),
         actions: [
@@ -296,74 +296,73 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Expanded(
                   child: GlassContainer(
                     height: 120,
-                    color: GlassTheme.accentBlue.withOpacity(0.25),
+                    color: GlassTheme.primaryEmerald.withOpacity(0.25),
+                    borderColor: GlassTheme.primaryNeon,
+                    onTap: () => widget.onNavigateTab(1), // Bulk Sender
+                    child: const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.send_rounded, color: GlassTheme.primaryNeon, size: 32),
+                        SizedBox(height: 8),
+                        Text(
+                          "Bulk Send",
+                          style: TextStyle(
+                            color: GlassTheme.textPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                        Text("5-Tab Engine", style: TextStyle(color: GlassTheme.textMuted, fontSize: 10)),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: GlassContainer(
+                    height: 120,
+                    color: GlassTheme.accentBlue.withOpacity(0.2),
                     borderColor: GlassTheme.accentBlue,
-                    onTap: () => widget.onNavigateTab(1), // Tasks screen
+                    onTap: () => widget.onNavigateTab(2), // Schedule Tasks
                     child: const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.add_circle, color: GlassTheme.accentBlue, size: 36),
+                        Icon(Icons.schedule_rounded, color: GlassTheme.accentBlue, size: 32),
                         SizedBox(height: 8),
                         Text(
-                          "New Task",
+                          "Schedule",
                           style: TextStyle(
                             color: GlassTheme.textPrimary,
                             fontWeight: FontWeight.bold,
-                            fontSize: 14,
+                            fontSize: 13,
                           ),
                         ),
+                        Text("SKEDit Engine", style: TextStyle(color: GlassTheme.textMuted, fontSize: 10)),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
                 Expanded(
                   child: GlassContainer(
                     height: 120,
-                    onTap: () {},
+                    color: GlassTheme.warningOrange.withOpacity(0.2),
+                    borderColor: GlassTheme.warningOrange,
+                    onTap: () => widget.onNavigateTab(3), // Auto Reply
                     child: const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.bolt, color: GlassTheme.warningOrange, size: 32),
+                        Icon(Icons.psychology_rounded, color: GlassTheme.warningOrange, size: 32),
                         SizedBox(height: 8),
                         Text(
-                          "Browse Ideas",
-                          style: TextStyle(color: GlassTheme.textSecondary, fontSize: 11),
-                        ),
-                        Text(
-                          "Templates",
+                          "AI Replier",
                           style: TextStyle(
                             color: GlassTheme.textPrimary,
                             fontWeight: FontWeight.bold,
-                            fontSize: 14,
+                            fontSize: 13,
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: GlassContainer(
-                    height: 120,
-                    onTap: () {},
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.help_outline, color: GlassTheme.textSecondary, size: 32),
-                        SizedBox(height: 8),
-                        Text(
-                          "Guide & support",
-                          style: TextStyle(color: GlassTheme.textSecondary, fontSize: 11),
-                        ),
-                        Text(
-                          "Help",
-                          style: TextStyle(
-                            color: GlassTheme.textPrimary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
+                        Text("Auto-Rules", style: TextStyle(color: GlassTheme.textMuted, fontSize: 10)),
                       ],
                     ),
                   ),

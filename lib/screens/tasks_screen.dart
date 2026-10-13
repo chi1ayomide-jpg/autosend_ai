@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../theme/glass_theme.dart';
 import '../widgets/glass_container.dart';
+import '../widgets/variable_chips_bar.dart';
 import '../models/task.dart';
 import '../services/storage_service.dart';
 import '../services/native_channel.dart';
@@ -280,6 +281,8 @@ class _TasksScreenState extends State<TasksScreen> with SingleTickerProviderStat
                 ),
               ),
               const SizedBox(height: 12),
+              const Text("Dynamic Placeholders:", style: TextStyle(color: GlassTheme.textMuted, fontSize: 11)),
+              VariableChipsBar(controller: messageController),
               TextField(
                 controller: messageController,
                 maxLines: 3,

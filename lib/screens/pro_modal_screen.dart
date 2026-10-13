@@ -65,12 +65,13 @@ class _ProModalScreenState extends State<ProModalScreen> {
             const Divider(color: GlassTheme.glassBorderLight),
 
             _buildFeatureRow("Advanced Attachments", "Photo", "Video & Docs"),
+            _buildFeatureRow("5-Tab Bulk Campaigns", "5 contacts", "Unlimited"),
+            _buildFeatureRow("Dynamic Placeholders {name}", "❌", "✔️"),
+            _buildFeatureRow("WhatsApp Multi-Client", "❌", "WhatsApp + Business + GB"),
             _buildFeatureRow("Usage Dashboard", "❌", "Lifetime"),
             _buildFeatureRow("Heatmap Trends", "❌", "✔️"),
             _buildFeatureRow("Task Tagging", "❌", "✔️"),
-            _buildFeatureRow("Filter & Search", "❌", "✔️"),
             _buildFeatureRow("Import CSV/Excel", "❌", "✔️"),
-            _buildFeatureRow("Recipient Lists", "❌", "✔️"),
             _buildFeatureRow("Cloud Backup", "❌", "✔️"),
             _buildFeatureRow("Pause during Calls", "❌", "✔️"),
 

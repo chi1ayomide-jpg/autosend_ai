@@ -8,8 +8,9 @@ class AppSettings {
   final bool reviewBeforeSending;
   final bool skipInternetCheck;
   final int defaultDelaySeconds;
-  final String defaultWhatsAppApp; // "com.whatsapp" or "com.whatsapp.w4b"
+  final String defaultWhatsAppApp; // "com.whatsapp", "com.whatsapp.w4b", "com.gbwhatsapp", "auto_rotate"
   final bool notifyOnSent;
+  final bool ignoreAccents;
 
   AppSettings({
     this.autoReplyEnabled = true,
@@ -20,10 +21,41 @@ class AppSettings {
     this.askBeforeSending = true,
     this.reviewBeforeSending = false,
     this.skipInternetCheck = false,
-    this.defaultDelaySeconds = 1,
+    this.defaultDelaySeconds = 2,
     this.defaultWhatsAppApp = "com.whatsapp",
     this.notifyOnSent = true,
+    this.ignoreAccents = true,
   });
+
+  AppSettings copyWith({
+    bool? autoReplyEnabled,
+    String? geminiApiKey,
+    String? openAiApiKey,
+    String? selectedAiModel,
+    bool? pauseOnCalls,
+    bool? askBeforeSending,
+    bool? reviewBeforeSending,
+    bool? skipInternetCheck,
+    int? defaultDelaySeconds,
+    String? defaultWhatsAppApp,
+    bool? notifyOnSent,
+    bool? ignoreAccents,
+  }) {
+    return AppSettings(
+      autoReplyEnabled: autoReplyEnabled ?? this.autoReplyEnabled,
+      geminiApiKey: geminiApiKey ?? this.geminiApiKey,
+      openAiApiKey: openAiApiKey ?? this.openAiApiKey,
+      selectedAiModel: selectedAiModel ?? this.selectedAiModel,
+      pauseOnCalls: pauseOnCalls ?? this.pauseOnCalls,
+      askBeforeSending: askBeforeSending ?? this.askBeforeSending,
+      reviewBeforeSending: reviewBeforeSending ?? this.reviewBeforeSending,
+      skipInternetCheck: skipInternetCheck ?? this.skipInternetCheck,
+      defaultDelaySeconds: defaultDelaySeconds ?? this.defaultDelaySeconds,
+      defaultWhatsAppApp: defaultWhatsAppApp ?? this.defaultWhatsAppApp,
+      notifyOnSent: notifyOnSent ?? this.notifyOnSent,
+      ignoreAccents: ignoreAccents ?? this.ignoreAccents,
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -38,6 +70,7 @@ class AppSettings {
       'defaultDelaySeconds': defaultDelaySeconds,
       'defaultWhatsAppApp': defaultWhatsAppApp,
       'notifyOnSent': notifyOnSent,
+      'ignoreAccents': ignoreAccents,
     };
   }
 
@@ -51,9 +84,10 @@ class AppSettings {
       askBeforeSending: json['askBeforeSending'] ?? true,
       reviewBeforeSending: json['reviewBeforeSending'] ?? false,
       skipInternetCheck: json['skipInternetCheck'] ?? false,
-      defaultDelaySeconds: json['defaultDelaySeconds'] ?? 1,
+      defaultDelaySeconds: json['defaultDelaySeconds'] ?? 2,
       defaultWhatsAppApp: json['defaultWhatsAppApp'] ?? "com.whatsapp",
       notifyOnSent: json['notifyOnSent'] ?? true,
+      ignoreAccents: json['ignoreAccents'] ?? true,
     );
   }
 }

@@ -64,4 +64,18 @@ class NativeChannel {
       });
     } catch (e) {}
   }
+
+  static Future<void> triggerAutomation({
+    required String phoneNumber,
+    required String message,
+    String package = "com.whatsapp",
+  }) async {
+    try {
+      await _platform.invokeMethod('triggerAutomation', {
+        'phone': phoneNumber,
+        'message': message,
+        'package': package,
+      });
+    } catch (e) {}
+  }
 }

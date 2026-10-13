@@ -48,7 +48,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Settings"),
+        title: const Text("OmniFlow Settings"),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(18),
@@ -64,25 +64,73 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   CircleAvatar(
                     radius: 24,
                     backgroundColor: GlassTheme.primaryEmerald,
-                    child: const Text("P", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20)),
+                    child: const Text("O", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20)),
                   ),
                   const SizedBox(width: 14),
                   const Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Premeire League Fans", style: TextStyle(color: GlassTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
-                        Text("premeireleaguefans@gmail.com", style: TextStyle(color: GlassTheme.textSecondary, fontSize: 12)),
+                        Text("OmniFlow Enterprise", style: TextStyle(color: GlassTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
+                        Text("Active Profile • Nigeria (+234)", style: TextStyle(color: GlassTheme.textSecondary, fontSize: 12)),
                         SizedBox(height: 4),
                         Row(
                           children: [
-                            Icon(Icons.star, color: GlassTheme.warningOrange, size: 14),
+                            Icon(Icons.verified, color: GlassTheme.primaryNeon, size: 14),
                             SizedBox(width: 4),
-                            Text("5 AI Credits remaining", style: TextStyle(color: GlassTheme.accentBlue, fontSize: 11)),
+                            Text("Unlimited Automations & Bulk Engine", style: TextStyle(color: GlassTheme.accentBlue, fontSize: 11)),
                           ],
                         ),
                       ],
                     ),
+                  ),
+                ],
+              ),
+            ),
+
+            // WhatsApp Engine Section
+            const Text("WhatsApp Engine Routing", style: TextStyle(color: GlassTheme.primaryNeon, fontWeight: FontWeight.bold, fontSize: 14)),
+            const SizedBox(height: 10),
+            GlassContainer(
+              margin: const EdgeInsets.only(bottom: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("Default WhatsApp Client", style: TextStyle(color: GlassTheme.textSecondary, fontSize: 13)),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: _settings.defaultWhatsAppApp,
+                    dropdownColor: GlassTheme.backgroundSecondary,
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: "com.whatsapp", child: Text("WhatsApp Standard (com.whatsapp)")),
+                      DropdownMenuItem(value: "com.whatsapp.w4b", child: Text("WhatsApp Business (com.whatsapp.w4b)")),
+                      DropdownMenuItem(value: "com.gbwhatsapp", child: Text("GB WhatsApp (com.gbwhatsapp)")),
+                      DropdownMenuItem(value: "auto_rotate", child: Text("Rotate Across All Installed Apps")),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) _updateSettings(_settings.copyWith(defaultWhatsAppApp: val));
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Sending Delay Interval", style: TextStyle(color: GlassTheme.textSecondary, fontSize: 13)),
+                      Text("${_settings.defaultDelaySeconds}s delay", style: const TextStyle(color: GlassTheme.primaryNeon, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  Slider(
+                    value: _settings.defaultDelaySeconds.toDouble(),
+                    min: 1.0,
+                    max: 10.0,
+                    divisions: 9,
+                    activeColor: GlassTheme.primaryNeon,
+                    onChanged: (val) => _updateSettings(_settings.copyWith(defaultDelaySeconds: val.toInt())),
                   ),
                 ],
               ),
@@ -104,15 +152,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.save, color: GlassTheme.primaryNeon),
                         onPressed: () {
-                          _updateSettings(AppSettings(
-                            autoReplyEnabled: _settings.autoReplyEnabled,
-                            geminiApiKey: _geminiKeyController.text,
-                            openAiApiKey: _openAiKeyController.text,
-                            selectedAiModel: _settings.selectedAiModel,
-                            pauseOnCalls: _settings.pauseOnCalls,
-                            askBeforeSending: _settings.askBeforeSending,
-                          ));
+                          _updateSettings(_settings.copyWith(geminiApiKey: _geminiKeyController.text));
                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Gemini API Key Saved")));
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: _openAiKeyController,
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    decoration: InputDecoration(
+                      labelText: "OpenAI API Key (Optional)",
+                      labelStyle: const TextStyle(color: GlassTheme.textSecondary),
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.save, color: GlassTheme.primaryNeon),
+                        onPressed: () {
+                          _updateSettings(_settings.copyWith(openAiApiKey: _openAiKeyController.text));
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("OpenAI API Key Saved")));
                         },
                       ),
                     ),
@@ -122,64 +179,49 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
 
             // Scheduled Automation Settings Section
-            const Text("Scheduled Controls", style: TextStyle(color: GlassTheme.primaryNeon, fontWeight: FontWeight.bold, fontSize: 14)),
+            const Text("Automation Guardrails", style: TextStyle(color: GlassTheme.primaryNeon, fontWeight: FontWeight.bold, fontSize: 14)),
             const SizedBox(height: 10),
+
+            _buildSwitchTile(
+              title: "Ignore Accents in Trigger Matching",
+              subtitle: "Matches accented words like 'crème' or 'café' transparently.",
+              value: _settings.ignoreAccents,
+              onChanged: (val) => _updateSettings(_settings.copyWith(ignoreAccents: val)),
+            ),
 
             _buildSwitchTile(
               title: "Pause automation on calls",
               subtitle: "Automatically pause sending if you receive or make a phone call.",
               value: _settings.pauseOnCalls,
-              onChanged: (val) => _updateSettings(AppSettings(
-                autoReplyEnabled: _settings.autoReplyEnabled,
-                geminiApiKey: _settings.geminiApiKey,
-                openAiApiKey: _settings.openAiApiKey,
-                selectedAiModel: _settings.selectedAiModel,
-                pauseOnCalls: val,
-                askBeforeSending: _settings.askBeforeSending,
-              )),
-            ),
-
-            _buildSwitchTile(
-              title: "Default 'Ask before sending' state",
-              subtitle: "Choose if 'Ask before sending' should be enabled by default for new tasks.",
-              value: _settings.askBeforeSending,
-              onChanged: (val) => _updateSettings(AppSettings(
-                autoReplyEnabled: _settings.autoReplyEnabled,
-                geminiApiKey: _settings.geminiApiKey,
-                openAiApiKey: _settings.openAiApiKey,
-                selectedAiModel: _settings.selectedAiModel,
-                pauseOnCalls: _settings.pauseOnCalls,
-                askBeforeSending: val,
-              )),
+              onChanged: (val) => _updateSettings(_settings.copyWith(pauseOnCalls: val)),
             ),
 
             _buildSwitchTile(
               title: "Skip Internet Check",
               subtitle: "Allow automation to proceed even if no network is detected.",
               value: _settings.skipInternetCheck,
-              onChanged: (val) => _updateSettings(AppSettings(
-                autoReplyEnabled: _settings.autoReplyEnabled,
-                geminiApiKey: _settings.geminiApiKey,
-                openAiApiKey: _settings.openAiApiKey,
-                selectedAiModel: _settings.selectedAiModel,
-                pauseOnCalls: _settings.pauseOnCalls,
-                askBeforeSending: _settings.askBeforeSending,
-                skipInternetCheck: val,
-              )),
+              onChanged: (val) => _updateSettings(_settings.copyWith(skipInternetCheck: val)),
+            ),
+
+            _buildSwitchTile(
+              title: "Notification Alerts on Sent",
+              subtitle: "Post a status notification whenever an auto-reply or bulk message finishes.",
+              value: _settings.notifyOnSent,
+              onChanged: (val) => _updateSettings(_settings.copyWith(notifyOnSent: val)),
             ),
 
             const SizedBox(height: 20),
             // Toolbox Section
-            const Text("Toolbox & Data", style: TextStyle(color: GlassTheme.primaryNeon, fontWeight: FontWeight.bold, fontSize: 14)),
+            const Text("Data & Storage", style: TextStyle(color: GlassTheme.primaryNeon, fontWeight: FontWeight.bold, fontSize: 14)),
             const SizedBox(height: 10),
             GlassContainer(
               margin: const EdgeInsets.only(bottom: 10),
               child: ListTile(
                 leading: const Icon(Icons.backup, color: GlassTheme.primaryNeon),
-                title: const Text("Backup & Restore", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                subtitle: const Text("Backup App Data to local JSON storage or restore queue.", style: TextStyle(color: GlassTheme.textSecondary, fontSize: 11)),
+                title: const Text("Export & Backup", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                subtitle: const Text("Export rules, templates and campaigns to local storage.", style: TextStyle(color: GlassTheme.textSecondary, fontSize: 11)),
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Backup file generated: autosend_backup.json")));
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Backup generated: omniflow_backup.json")));
                 },
               ),
             ),

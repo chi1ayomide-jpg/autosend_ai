@@ -8,7 +8,7 @@ class AIService {
     String model = "gemini",
   }) async {
     if (apiKey.isEmpty) {
-      return "Hello! AutoSend AI received: '$prompt'. (Configure AI API Key in Settings for smart replies)";
+      return "Hello! OmniFlow AI received: '$prompt'. (Configure AI API Key in Settings for smart replies)";
     }
 
     if (model == "openai") {

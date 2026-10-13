@@ -4,19 +4,22 @@ import 'screens/main_navigation.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const AutoSendApp());
+  runApp(const OmniFlowApp());
 }
 
-class AutoSendApp extends StatelessWidget {
-  const AutoSendApp({super.key});
+class OmniFlowApp extends StatelessWidget {
+  const OmniFlowApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'AutoSend AI',
+      title: 'OmniFlow AI',
       debugShowCheckedModeBanner: false,
       theme: GlassTheme.darkTheme,
       home: const MainNavigation(),
     );
   }
 }
+
+// Alias for test backward-compatibility
+typedef AutoSendApp = OmniFlowApp;
