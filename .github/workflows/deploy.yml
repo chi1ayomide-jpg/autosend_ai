@@ -45,7 +45,7 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: autosend-ai-release-apk
+          name: omniflow-ai-release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
 
       - name: Generate Release Tag
@@ -57,19 +57,21 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tag.outputs.TAG }}
-          name: "AutoSend AI ${{ steps.tag.outputs.TAG }}"
+          name: "OmniFlow AI ${{ steps.tag.outputs.TAG }}"
           body: |
-            ## 🚀 AutoSend AI — WhatsApp Auto-Reply & Scheduler
+            ## 🌟 OmniFlow AI — WhatsApp Automation, Bulk Dispatcher & AI Replier
 
-            ### ✨ Features:
-            - **Emerald Glassmorphic UI** — Flutter dark glass interface with neon accents.
-            - **Notification Listener Service** — AI-powered inline WhatsApp auto-reply (`RemoteInput`).
-            - **Accessibility Automation** — Automated chat open, type, and send.
-            - **Exact Alarms Engine** — High-precision scheduling with Doze bypass.
-            - **AI Engine** — Gemini & OpenAI smart auto-reply integration.
+            ### ✨ Features Included:
+            - **5-Tab Bulk Sender Studio** — Dashboard, Contacts directory, Direct country code input (+234 default), Recent logs, and Favourites.
+            - **Strict Approval Gate** — Zero messages sent without your explicit review & confirmation.
+            - **100% Natural Human Messages** — Clean text without any AI indicator footers or bot tags.
+            - **Dynamic Variables** — Replace `{name}`, `{first_name}`, `{time}`, `{date}`, `{phone}` on the fly.
+            - **Multi-Client WhatsApp Support** — Seamless routing for WhatsApp, WhatsApp Business, and GB WhatsApp.
+            - **Android Quick Settings Tile** — Notification shade tile for 1-tap toggle.
+            - **Emerald Glassmorphic UI** — High-end dark theme with blur and neon accents.
 
             ### 📲 Install:
-            Download `app-release.apk` below and install on your Android device.
+            Download `app-release.apk` below and install directly on your Android phone.
           files: build/app/outputs/flutter-apk/app-release.apk
           draft: false
           prerelease: false
