@@ -8,7 +8,7 @@ class AIService {
     String model = "gemini",
   }) async {
     if (apiKey.isEmpty) {
-      return "Hello! OmniFlow AI received: '$prompt'. (Configure AI API Key in Settings for smart replies)";
+      return "Hey! Got your message, will get back to you shortly.";
     }
 
     if (model == "openai") {
@@ -31,7 +31,7 @@ class AIService {
               'parts': [
                 {
                   'text':
-                      'You are an automated assistant replying to WhatsApp chats. Generate a concise, polite, and helpful response for: $prompt'
+                      'You are replying to a WhatsApp message on behalf of the user. Respond naturally, casually and politely like a normal human person in 1 or 2 concise sentences. Do NOT mention you are an AI, bot, or assistant: $prompt'
                 }
               ]
             }
@@ -47,8 +47,8 @@ class AIService {
           return text.toString().trim();
         }
       }
-    } catch (e) {}
-    return "Thank you for your message! AutoSend AI received: $prompt";
+    } catch (_) {}
+    return "Hey! Got your message, will get back to you shortly.";
   }
 
   static Future<String> _callOpenAI(String prompt, String apiKey) async {
@@ -65,7 +65,8 @@ class AIService {
           'messages': [
             {
               'role': 'system',
-              'content': 'You are a helpful automated WhatsApp auto-responder.'
+              'content':
+                  'You are replying to a WhatsApp chat message on behalf of the user. Respond naturally and politely like a normal human person in 1 or 2 concise sentences. Never mention AI or bot.'
             },
             {'role': 'user', 'content': prompt}
           ],
@@ -78,7 +79,7 @@ class AIService {
         final text = json['choices'][0]['message']['content'];
         return text.toString().trim();
       }
-    } catch (e) {}
-    return "AutoSend AI: Received '$prompt'";
+    } catch (_) {}
+    return "Hey! Got your message, talk soon.";
   }
 }

@@ -11,8 +11,8 @@ class AppSettings {
   final String defaultWhatsAppApp; // "com.whatsapp", "com.whatsapp.w4b", "com.gbwhatsapp", "auto_rotate"
   final bool notifyOnSent;
   final bool ignoreAccents;
-  final bool includeAiTag; // Attach AI indicator tag/footer
-  final String aiTagFooter; // e.g. "— 🤖 Sent via OmniFlow AI"
+  final bool includeAiTag; // Kept false: messages appear as normal human messages
+  final String aiTagFooter;
 
   AppSettings({
     this.autoReplyEnabled = true,
@@ -27,8 +27,8 @@ class AppSettings {
     this.defaultWhatsAppApp = "com.whatsapp",
     this.notifyOnSent = true,
     this.ignoreAccents = true,
-    this.includeAiTag = true,
-    this.aiTagFooter = "\n\n_⚡ AI Assisted • OmniFlow AI_",
+    this.includeAiTag = false, // Clean human format by default
+    this.aiTagFooter = "",
   });
 
   AppSettings copyWith({
@@ -98,8 +98,8 @@ class AppSettings {
       defaultWhatsAppApp: json['defaultWhatsAppApp'] ?? "com.whatsapp",
       notifyOnSent: json['notifyOnSent'] ?? true,
       ignoreAccents: json['ignoreAccents'] ?? true,
-      includeAiTag: json['includeAiTag'] ?? true,
-      aiTagFooter: json['aiTagFooter'] ?? "\n\n_⚡ AI Assisted • OmniFlow AI_",
+      includeAiTag: json['includeAiTag'] ?? false,
+      aiTagFooter: json['aiTagFooter'] ?? "",
     );
   }
 }

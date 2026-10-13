@@ -190,13 +190,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
 
             _buildSwitchTile(
-              title: "Attach AI Tag Indicator Description",
-              subtitle: "Appends '⚡ AI Assisted • OmniFlow AI' indicator to all outgoing messages.",
-              value: _settings.includeAiTag,
-              onChanged: (val) => _updateSettings(_settings.copyWith(includeAiTag: val)),
-            ),
-
-            _buildSwitchTile(
               title: "Ignore Accents in Trigger Matching",
               subtitle: "Matches accented words like 'crème' or 'café' transparently.",
               value: _settings.ignoreAccents,

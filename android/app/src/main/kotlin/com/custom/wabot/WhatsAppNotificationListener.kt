@@ -38,16 +38,13 @@ class WhatsAppNotificationListener : NotificationListenerService() {
         val autoReplyEnabled = prefs.getBoolean("flutter.auto_reply_enabled", true)
         if (!autoReplyEnabled) return
 
-        val includeAiTag = prefs.getBoolean("flutter.include_ai_tag", true)
-        val aiTag = if (includeAiTag) "\n\n_⚡ AI Assisted • OmniFlow AI_" else ""
-
         val apiKey = prefs.getString("flutter.gemini_api_key", "") ?: ""
-        var replyMessage = "Hello $sender! OmniFlow AI received: $incomingText$aiTag"
+        var replyMessage = "Hello $sender! Received your message. Will get back to you shortly."
 
         if (apiKey.isNotEmpty()) {
             val aiResponse = callGeminiAI(apiKey, incomingText)
             if (aiResponse.isNotEmpty()) {
-                replyMessage = "$aiResponse$aiTag"
+                replyMessage = aiResponse // Clean natural human response - zero AI indicators
             }
         }
 
@@ -64,7 +61,7 @@ class WhatsAppNotificationListener : NotificationListenerService() {
 
                     try {
                         action.actionIntent.send(applicationContext, 0, intent)
-                        Log.d("OmniFlowNotification", "Sent inline reply with AI tag: $replyMessage")
+                        Log.d("OmniFlowNotification", "Sent inline reply: $replyMessage")
                     } catch (e: Exception) {
                         Log.e("OmniFlowNotification", "Failed to send inline reply", e)
                     }
@@ -87,7 +84,7 @@ class WhatsAppNotificationListener : NotificationListenerService() {
                     put(JSONObject().apply {
                         put("parts", JSONArray().apply {
                             put(JSONObject().apply {
-                                put("text", "You are an automated assistant replying to WhatsApp chats. Concise, polite reply to: $prompt")
+                                put("text", "You are replying to a WhatsApp chat message on behalf of the user. Respond naturally, casually and politely like a normal person in 1 or 2 concise sentences. Do NOT mention you are an AI or bot: $prompt")
                             })
                         })
                     })

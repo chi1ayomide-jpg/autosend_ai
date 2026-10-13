@@ -33,10 +33,8 @@ class _BulkSenderScreenState extends State<BulkSenderScreen> with SingleTickerPr
   String _selectedPackage = "com.whatsapp";
   double _sendDelaySeconds = 2.0;
 
-  // Safety & Approval controls
-  bool _requireApproval = true; // DO NOT SEND WITHOUT APPROVAL
-  bool _attachAiTag = true; // Include AI tag description indicator
-  final String _aiTagFooter = "\n\n_⚡ AI Assisted • OmniFlow AI_";
+  // Safety & Approval controls: DO NOT SEND WITHOUT APPROVAL
+  bool _requireApproval = true;
 
   // Message template
   final TextEditingController _messageController = TextEditingController(
@@ -196,23 +194,9 @@ class _BulkSenderScreenState extends State<BulkSenderScreen> with SingleTickerPr
                     fillColor: Colors.black.withOpacity(0.4),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: GlassTheme.glassBorder),
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
-                if (_attachAiTag)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: GlassTheme.accentBlue.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: const Text(
-                      "🏷️ AI Tag indicator is attached at footer",
-                      style: TextStyle(color: GlassTheme.accentBlue, fontSize: 11),
-                    ),
-                  ),
               ],
             ),
           ),
@@ -260,18 +244,14 @@ class _BulkSenderScreenState extends State<BulkSenderScreen> with SingleTickerPr
       final target = active[i];
 
       // 1. Resolve variables
+      // 1. Resolve variables - completely clean natural human text
       var personalized = VariableService.resolve(
         _messageController.text,
         name: target.name,
         phone: target.phone,
       );
 
-      // 2. Attach AI tag indicator description if enabled
-      if (_attachAiTag && !personalized.contains("OmniFlow AI")) {
-        personalized = "$personalized$_aiTagFooter";
-      }
-
-      // 3. User Approval Gate: NEVER SEND WITHOUT EXPLICIT APPROVAL
+      // 2. User Approval Gate: NEVER SEND WITHOUT EXPLICIT APPROVAL
       if (_requireApproval) {
         final approvalResult = await _requestApprovalDialog(
           recipientName: target.name,
@@ -418,15 +398,6 @@ class _BulkSenderScreenState extends State<BulkSenderScreen> with SingleTickerPr
                   activeColor: GlassTheme.primaryNeon,
                   onChanged: (val) => setState(() => _requireApproval = val),
                 ),
-                const Divider(color: GlassTheme.glassBorderLight),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text("Attach AI Tag Indicator", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                  subtitle: const Text("Appends '⚡ AI Assisted • OmniFlow AI' footer to indicate automated generation.", style: TextStyle(color: GlassTheme.textMuted, fontSize: 11)),
-                  value: _attachAiTag,
-                  activeColor: GlassTheme.primaryNeon,
-                  onChanged: (val) => setState(() => _attachAiTag = val),
-                ),
               ],
             ),
           ),
@@ -524,11 +495,10 @@ class _BulkSenderScreenState extends State<BulkSenderScreen> with SingleTickerPr
                       const SizedBox(height: 4),
                       Text(
                         VariableService.resolve(
-                              _messageController.text,
-                              name: _recipients.isNotEmpty ? _recipients.first.name : "Tunde Ade",
-                              phone: _recipients.isNotEmpty ? _recipients.first.phone : "+23480...",
-                            ) +
-                            (_attachAiTag ? _aiTagFooter : ""),
+                          _messageController.text,
+                          name: _recipients.isNotEmpty ? _recipients.first.name : "Tunde Ade",
+                          phone: _recipients.isNotEmpty ? _recipients.first.phone : "+23480...",
+                        ),
                         style: const TextStyle(color: Colors.white70, fontSize: 12),
                       ),
                     ],
